@@ -50,7 +50,32 @@ public class Alta extends HttpServlet {
 		String apellido = request.getParameter("apellido");
 		String dni = request.getParameter("dni");
 		
-		Paciente p = new Paciente()
+		Paciente p = new Paciente(nombre, apellido, dni);
+		
+		InputStream file = getServletContext().getResourceAsStream("/alta");
+		InputStreamReader r1 = new InputStreamReader(file);
+		PrintWriter out = response.getWriter();
+		BufferedReader html = new BufferedReader(r1);
+		String pagina = "", linea;
+		String resultado =" ";
+		while((linea = html.readLine())!=null) {
+			pagina +=linea;
+		}
+		
+		PacienteRepository pr = (PacienteRepository) getServletContext().getAttribute("repo");
+
+		if(pr.findByDni(dni)==null) {//es decir, no existe
+			pr.addPaciente(p);
+			resultado = "el paciente con dni "+dni+"ha sido añadido con éxito";
+		}
+		else {
+			resultado = "el paciente con dni"+dni+"ya estaba añadido";
+		}
+		
+		pagina = pagina.replace("<h2></h2>", "<h2>"+resultado+"</h2>");
+		response.setContentType("text/html");
+		out.print(pagina);
+		out.close();
 	
 	
 	
